@@ -1,0 +1,59 @@
+package com.tasty.servlet;
+
+import com.tasty.dao.UserDao;
+import com.tasty.utils.VerifyCodeUtils;
+import net.sf.json.JSONObject;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
+
+public class LoginServlet extends HttpServlet {
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String type=req.getParameter("type");
+        if(type.equals("logout")){
+            HttpSession session=req.getSession();
+            session.removeAttribute("username");
+            resp.sendRedirect("/login.jsp");
+        }
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String  username= request.getParameter("username");
+        String  password= request.getParameter("password");
+        String checkcode=request.getParameter("checkcode");
+        HttpSession session=request.getSession();
+        String code= (String) session.getAttribute("verCode");
+        Map map=new HashMap();
+        map.put("status","0");
+        map.put("data","登录失败");
+        if(checkcode.length()==4){   //设定验证码为4位
+            checkcode= VerifyCodeUtils.codeToLowerCase(checkcode);  //前台输入的验证码转为小写字母
+            if(code.equals(checkcode)){
+                UserDao userDao=new UserDao();
+                try {
+                    if(userDao.isRegistered(username,password))
+                        map.put("status","1");
+                    map.put("data","登录成功！");
+                    session.setAttribute("username",username);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        JSONObject msg=JSONObject.fromObject(map);
+        System.out.println(msg);
+        response.setCharacterEncoding("UTF-8");
+        PrintWriter out=response.getWriter();
+        out.println(msg);
+    }
+}
