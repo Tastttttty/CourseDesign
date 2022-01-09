@@ -5,6 +5,7 @@ import com.tasty.utils.VerifyCodeUtils;
 import net.sf.json.JSONObject;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -15,18 +16,8 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
+@WebServlet(name="LoginServlet", urlPatterns={"/login.do"})
 public class LoginServlet extends HttpServlet {
-    @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String type=req.getParameter("type");
-        if(type.equals("logout")){
-            HttpSession session=req.getSession();
-            session.removeAttribute("username");
-            resp.sendRedirect("/login.jsp");
-        }
-    }
-
-    @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String  username= request.getParameter("username");
         String  password= request.getParameter("password");
@@ -55,5 +46,13 @@ public class LoginServlet extends HttpServlet {
         response.setCharacterEncoding("UTF-8");
         PrintWriter out=response.getWriter();
         out.println(msg);
+    }
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String type=request.getParameter("type");
+        if(type.equals("logout")){
+            HttpSession session=request.getSession();
+            session.removeAttribute("username");
+            response.sendRedirect("/login.jsp");
+        }
     }
 }

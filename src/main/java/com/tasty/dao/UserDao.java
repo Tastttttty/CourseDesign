@@ -25,6 +25,7 @@ public class UserDao {
                 System.out.println(rs.getString(2)+"\t"+rs.getString(3));
                 IsRegistered=true;
             }
+
         }catch (SQLException e){
             con.rollback();
             e.printStackTrace();
